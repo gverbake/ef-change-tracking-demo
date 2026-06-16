@@ -1,7 +1,11 @@
-using Microsoft.EntityFrameworkCore;
+using EFCoreChangeTracking.Auditing;
 using EFCoreChangeTracking.Core.DbContexts;
 using EFCoreChangeTracking.Core.Models;
-using EFCoreChangeTracking.Auditing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace EFCoreChangeTracking.Demo;
 
@@ -58,7 +62,7 @@ public class DemoRunner
 
         Console.WriteLine("\n1. Adding new customer (not yet saved)...");
         _dbContext.Customers.Add(customer);
-        
+
         var summary = _changeTrackingService.GetChangeSummary();
         Console.WriteLine($"Change Summary: {summary}");
 
@@ -70,7 +74,7 @@ public class DemoRunner
         Console.WriteLine("\n3. Modifying customer...");
         customer.CreditLimit = 15000;
         customer.Address.City = "Boston";
-        
+
         summary = _changeTrackingService.GetChangeSummary();
         Console.WriteLine($"Change Summary: {summary}");
 
@@ -117,7 +121,7 @@ public class DemoRunner
 
         Console.WriteLine("\n1. Creating customer with owned entities...");
         _dbContext.Customers.Add(customer);
-        
+
         // Show owned entity information
         var ownedInfo = _changeTrackingService.GetOwnedEntityInfo().ToList();
         Console.WriteLine("\n2. Owned Entities Information:");
@@ -134,7 +138,7 @@ public class DemoRunner
         // Modify owned collection
         Console.WriteLine("\n4. Modifying owned collection (adding contact)...");
         customer.ContactMethods.Add(new ContactInfo { Type = "Fax", Value = "555-9999", IsPrimary = false });
-        
+
         var summary = _changeTrackingService.GetChangeSummary();
         Console.WriteLine($"Change Summary: {summary}");
 
@@ -158,18 +162,18 @@ public class DemoRunner
         Console.WriteLine("\n\n========== DEMO 3: Change Detection ==========");
 
         var customer = await _dbContext.Customers.FirstAsync();
-        
+
         Console.WriteLine($"\n1. Original customer: {customer.Name}");
         Console.WriteLine("\n2. Modifying without SaveChanges...");
         customer.Email = "newemail@example.com";
         customer.CreditLimit = 25000;
-        
+
         Console.WriteLine("\n3. Calling DetectChanges...");
         _dbContext.ChangeTracker.DetectChanges();
-        
+
         var summary = _changeTrackingService.GetChangeSummary();
         Console.WriteLine($"Change Summary: {summary}");
-        
+
         var changes = _changeTrackingService.GetAllChanges().FirstOrDefault();
         if (changes != null)
         {
@@ -193,7 +197,7 @@ public class DemoRunner
 
         // Create a new order
         var customer = await _dbContext.Customers.FirstAsync();
-        
+
         Console.WriteLine("\n1. Creating new order...");
         var order = new Order
         {
@@ -208,7 +212,7 @@ public class DemoRunner
                 ReferenceCode = "REF-001"
             }
         };
-        
+
         order.Items.Add(new OrderItem
         {
             ProductName = "Widget",
@@ -216,7 +220,7 @@ public class DemoRunner
             UnitPrice = 100,
             LineTotal = 1000
         });
-        
+
         order.Items.Add(new OrderItem
         {
             ProductName = "Gadget",
@@ -235,7 +239,7 @@ public class DemoRunner
         Console.WriteLine("\n3. Modifying order status...");
         order.Status = OrderStatus.Confirmed;
         order.Metadata.Notes = "Rush order - approved";
-        
+
         Console.WriteLine("\n4. Recording audit for modification...");
         await _auditService.AuditChangesAsync();
         await _dbContext.SaveChangesAsync();
@@ -258,13 +262,13 @@ public class DemoRunner
         _auditService.SetCurrentUser("admin", "Admin User");
 
         var customer = await _dbContext.Customers.FirstAsync();
-        
+
         Console.WriteLine($"\n1. Original customer count: {await _dbContext.Customers.CountAsync()}");
         Console.WriteLine($"\n2. Soft deleting customer: {customer.Name}");
-        
+
         customer.IsDeleted = true;
         customer.DeletedAt = DateTime.UtcNow;
-        
+
         Console.WriteLine("\n3. Recording audit for soft delete...");
         _dbContext.Entry(customer).State = EntityState.Modified;
         await _auditService.AuditChangesAsync();
@@ -273,7 +277,7 @@ public class DemoRunner
 
         // Note: Query filter automatically excludes deleted customers
         Console.WriteLine($"\n4. Customer count after soft delete (excluding deleted): {await _dbContext.Customers.CountAsync()}");
-        
+
         // Query including deleted
         var allCustomers = await _dbContext.Customers.IgnoreQueryFilters().CountAsync();
         Console.WriteLine($"   Customer count including deleted: {allCustomers}");

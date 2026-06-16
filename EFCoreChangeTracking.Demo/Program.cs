@@ -1,9 +1,10 @@
+using EFCoreChangeTracking.Auditing;
+using EFCoreChangeTracking.Core.DbContexts;
+using EFCoreChangeTracking.Demo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using EFCoreChangeTracking.Core.DbContexts;
-using EFCoreChangeTracking.Auditing;
-using EFCoreChangeTracking.Demo;
+using System;
 
 // Setup Dependency Injection
 var services = new ServiceCollection();
@@ -19,7 +20,7 @@ services.AddDbContext<ApplicationDbContext>(options =>
 {
     // For SQL Server:
     // options.UseSqlServer("Server=.;Database=EFCoreChangeTrackingDemo;Trusted_Connection=true;");
-    
+
     // For In-Memory (for demo):
     options.UseInMemoryDatabase("ChangeTrackingDemo");
 });
