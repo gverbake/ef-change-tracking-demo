@@ -1,13 +1,8 @@
-using EFCoreChangeTracking.Core.DbContexts;
-using EFCoreChangeTracking.Core.Models;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
+using EFCoreChangeTracking.Core.DbContexts;
+using EFCoreChangeTracking.Core.Models;
 
 namespace EFCoreChangeTracking.Auditing;
 
@@ -34,7 +29,7 @@ public class AuditService
     public async Task AuditChangesAsync()
     {
         _dbContext.ChangeTracker.DetectChanges();
-
+        
         var entries = _dbContext.ChangeTracker.Entries()
             .Where(e => e.State != EntityState.Unchanged && e.State != EntityState.Detached)
             .ToList();
@@ -83,12 +78,6 @@ public class AuditService
 
         foreach (var property in entry.Properties)
         {
-            // Include owned entity properties
-            if (property.Metadata.IsOwned())
-            {
-                continue; // Skip navigation properties
-            }
-
             if (entry.State == EntityState.Modified)
             {
                 if (property.IsModified)
@@ -112,7 +101,7 @@ public class AuditService
         foreach (var navigation in entry.Metadata.GetNavigations().Where(n => n.TargetEntityType.IsOwned()))
         {
             changedProperties.Add(navigation.Name);
-
+            
             var ownedEntry = entry.Navigation(navigation.Name);
             if (ownedEntry != null)
             {

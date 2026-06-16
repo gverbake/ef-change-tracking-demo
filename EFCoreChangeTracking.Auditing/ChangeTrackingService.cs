@@ -1,10 +1,8 @@
-using EFCoreChangeTracking.Core.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Text.Json;
+using EFCoreChangeTracking.Core.DbContexts;
+using EFCoreChangeTracking.Core.Models;
 
 namespace EFCoreChangeTracking.Auditing;
 
@@ -113,7 +111,7 @@ public class ChangeTrackingService
     public IEnumerable<EntityChanges> GetAllChanges()
     {
         _dbContext.ChangeTracker.DetectChanges();
-
+        
         var allEntries = _dbContext.ChangeTracker.Entries()
             .Where(e => e.State != EntityState.Unchanged && e.State != EntityState.Detached);
 
@@ -138,7 +136,7 @@ public class ChangeTrackingService
     public IEnumerable<OwnedEntityInfo> GetOwnedEntityInfo()
     {
         var entries = _dbContext.ChangeTracker.Entries();
-
+        
         foreach (var entry in entries)
         {
             var entityType = entry.Metadata;
@@ -167,7 +165,7 @@ public class ChangeSummary
     public int Detached { get; set; }
     public bool HasChanges { get; set; }
 
-    public override string ToString() =>
+    public override string ToString() => 
         $"Added: {Added}, Modified: {Modified}, Deleted: {Deleted}, Unchanged: {Unchanged}, Detached: {Detached}";
 }
 
@@ -186,7 +184,7 @@ public class PropertyChange
     public string? CurrentValue { get; set; }
     public string PropertyType { get; set; } = string.Empty;
 
-    public override string ToString() =>
+    public override string ToString() => 
         $"{PropertyName} ({PropertyType}): {OriginalValue ?? "<null>"} → {CurrentValue ?? "<null>"}";
 }
 
