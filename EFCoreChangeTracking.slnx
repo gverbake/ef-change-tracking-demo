@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="EFCoreChangeTracking.Core/EFCoreChangeTracking.Core.csproj" />
+  <Project Path="EFCoreChangeTracking.Auditing/EFCoreChangeTracking.Auditing.csproj" />
+  <Project Path="EFCoreChangeTracking.Demo/EFCoreChangeTracking.Demo.csproj" />
+</Solution>
