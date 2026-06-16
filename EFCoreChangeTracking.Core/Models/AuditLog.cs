@@ -1,3 +1,5 @@
+using System;
+
 namespace EFCoreChangeTracking.Core.Models;
 
 public class AuditLog
@@ -9,7 +11,7 @@ public class AuditLog
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     public string? UserId { get; set; }
     public string? UserName { get; set; } = "System";
-    
+
     // JSON serialized changes
     public string OriginalValues { get; set; } = "{}";
     public string CurrentValues { get; set; } = "{}";

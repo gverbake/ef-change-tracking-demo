@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace EFCoreChangeTracking.Core.Models;
 
 public class Order
@@ -7,14 +10,14 @@ public class Order
     public DateTime OrderDate { get; set; } = DateTime.UtcNow;
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
     public decimal TotalAmount { get; set; }
-    
+
     // Owned entity
     public OrderMetadata Metadata { get; set; } = new();
-    
+
     // Navigation
     public Customer? Customer { get; set; }
     public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
-    
+
     // Audit
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ModifiedAt { get; set; }
@@ -36,7 +39,7 @@ public class OrderItem
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal LineTotal { get; set; }
-    
+
     public Order? Order { get; set; }
 }
 
